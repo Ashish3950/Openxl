@@ -1,0 +1,139 @@
+import os
+import csv
+import openpyxl
+import datetime
+'''Test cases'''
+def name(temp):
+    if not temp:
+        print('\nUser name can not be empty\n')
+        return False
+    else:
+        return True
+
+def incidentno(inci):
+    if not inci:
+        print('\nIncident  can not be empty')
+        return False
+    elif not inci.isdigit():
+        print('\nIncident should be a number')
+        return False
+    else:
+        return True
+    
+def actionfunc(action12):
+    if not action12:
+        print('\nPlease Enter the action Value')
+        return False
+    elif action12 not in ['1','2']:
+        print('\nAction should be  in 1 or 2')
+        return False
+    else:
+        return True
+    
+'''Url Correction Method'''
+def url(urllink):
+    temp=str()
+    for i in urllink:
+        if(i!='.'):
+            temp+=i
+        else:
+            temp=temp+'[.]'
+    return temp
+    
+''' Original Code'''
+os.chdir("D:\\Automation")
+with open('Forcepointreport.txt','w') as f_file:
+    f_file.write("\n\nFollowing are the alerts that we received in Forcepoint:\n \n")
+wb=openpyxl.Workbook()
+sheet=wb.active
+sheet.title="Forcepoint1"
+k=1
+excel_row=1
+excel_column=1
+while (k==1):
+    flag1=False
+    while(flag1==False):
+        temp=input("Please Enter the User name\n ")
+        temp.strip()
+        flag1=name(temp)
+    with open('export.csv') as autocsv_file:
+        csv_reader=csv.reader(autocsv_file)
+        flag='Zero'
+        for line in csv_reader:
+            if temp in line and line[1]=='Critical':
+                flag='Critical'
+                break
+            elif temp in line and line[1]=='High':
+                flag='High'
+            elif temp in line and line[1]=='Medium' and flag!='High':
+                flag='Medium'
+        if(flag=='Zero'):
+            print('\nNo user found with that name in Critical,High and Medium Category Level Alerts\n')
+        else:
+            flag1=False
+            while(flag1==False):
+                incident=input("Please Enter the No of incident\n ")
+                incident.strip()
+                flag1=incidentno(incident)
+            flag1=False
+            while(flag1==False):
+                action=input("Please check the action press 1 for permited and 2 Blocked \n")
+                action.strip()
+                flag1=actionfunc(action)
+            autocsv_file.seek(0)
+            with open('Forcepointreport.txt','a') as f_file:
+                for line in csv_reader:
+                    if temp in line and line[1]==flag:
+                        line[5]=url(line[5])
+                        sheet.cell(excel_row,1).value=datetime.date.today().strftime ("%d/%m/%Y")
+                        sheet.cell(excel_row,3).value=line[0]
+                        sheet.cell(excel_row,8).value=line[2]
+                        sheet.cell(excel_row,9).value=line[3]
+                        sheet.cell(excel_row,10).value=line[5]
+                        sheet.cell(excel_row,11).value=line[1]
+                        if(action=='1'):
+                            action1='Permit'
+                        else:
+                            action1='Block'
+                        sheet.cell(excel_row,12).value=action1
+                        sheet.cell(excel_row,13).value=line[4]
+                        sheet.cell(excel_row,8).value=line[2]
+                        excel_row+=1
+                        f_file.write("Severity:"+' '+line[1]+'\n')
+                        f_file.write("User:"+' '+line[0]+'\n')
+                        f_file.write("Source Ip:"+' '+line[2]+'\n')
+                        f_file.write("Destination Ip:"+' '+line[3]+'\n')
+                        f_file.write("Direction:"+' '+line[4]+'\n')
+                        f_file.write("Incident:"+' '+str(incident)+'\n')
+                        f_file.write("URL:"+' '+line[5]+'\n')
+                        f_file.write("Category:"+'  '+line[7]+'\n')
+                        if(action=='1'):
+                            action='Permit'
+                        else:
+                            action='Block'
+                        f_file.write("Action:"+' '+action+'\n')
+                        f_file.write("\n")
+                        f_file.write("\n")
+                        print('\n\nUser is Successfully added')
+                        break
+                
+    flag1=False
+    while(flag1==False):   
+        k=input("\nIf want to add more users press 1 or to exit press 2\n")
+        k.strip()
+        flag1=actionfunc(k)
+    k=int(k)
+wb.save('Forcepointdata.xlsx') 
+print("Thanks For Your Time Have a Great Day \n Forcepoint Report and Excel Data file is saved in the D://Automation")                  
+                        
+                        
+                        
+                        
+                        
+                        
+                    
+                
+                
+                
+                
+        
